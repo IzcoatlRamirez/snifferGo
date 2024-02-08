@@ -1,0 +1,15 @@
+--para iniciar el proyecto (creara un archivo go.mod)--
+
+go mod init github.com/IzcoatlRam/go-sniffer
+
+--para compilar y ejecutar--
+
+go run main.go
+
+--para generar ejecutable--
+
+go build .
+
+--para instalar dependencias--
+
+go get github.com/fatih/color
