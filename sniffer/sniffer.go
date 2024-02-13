@@ -88,7 +88,7 @@ func (s *Sniffer) Run() {
 
 	for !Exit {
 		s.Show()
-		time.Sleep(100 * time.Millisecond)
+		time.Sleep(150 * time.Millisecond)
 		ClearScreen()
 
 		currentPos := s.Env.GetPositionAgent()
