@@ -17,3 +17,7 @@ func NewSensorSimple(env *entorno.Entorno) *SensorSimple {
 func (s *SensorSimple) DetectDirt(position [2]int) bool {
 	return s.env.IsDirty(position)
 }
+
+func (s *SensorSimple) GetMoves() [][2]int {
+	return s.env.GetAvailableMoves()
+}	
