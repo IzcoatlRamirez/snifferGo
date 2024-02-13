@@ -2,24 +2,24 @@ package main
 
 import (
 	// "fmt"
-	"github.com/IzcoatlRam/sniffer-go/actuador"
-	"github.com/IzcoatlRam/sniffer-go/entorno"
-	"github.com/IzcoatlRam/sniffer-go/sensor"
-	"github.com/IzcoatlRam/sniffer-go/sniffer"
+	actuador "github.com/IzcoatlRam/sniffer-go/actuador"
+	entorno "github.com/IzcoatlRam/sniffer-go/entorno"
+	sensor "github.com/IzcoatlRam/sniffer-go/sensor"
+	sniffer "github.com/IzcoatlRam/sniffer-go/sniffer"
 )
 
 func main() {
+    e1 := entorno.NewEntorno(10, 0.50)
+    s1 := sensor.NewSensorSimple(e1)
+    a1 := actuador.NewActuadorSimple(e1)
+    sniffer1 := sniffer.NewSniffer(s1, a1, e1)
+    sniffer1.Run()
 
-	env := entorno.NewEntorno(10, 0.5)
+    // fmt.Println()
 
-	sensor := sensor.NewSensorSimple(env)
-	actuador := actuador.NewActuadorSimple(env)
-
-	sniffer := sniffer.NewSniffer(sensor, actuador, env)
-
-	// sniffer.Env.PrintMatrix()
-	// fmt.Println(sniffer.Sensor.DetectDirt([2]int{0, 1}))
-	sniffer.Run()
-
-	//
+    // e2 := entorno.NewEntorno(5, 0.5)
+    // s2 := sensor.NewSensorSimple(e2)
+    // a2 := actuador.NewActuadorSimple(e2)
+    // sniffer2 := sniffer.NewSniffer(s2, a2, e2)
+    // sniffer2.Run()
 }

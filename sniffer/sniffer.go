@@ -11,6 +11,8 @@ import (
 	"os"
 	"os/exec"
 	"time"
+	"github.com/fatih/color"
+	"strconv"
 )
 
 type Sniffer struct {
@@ -46,7 +48,7 @@ func (s *Sniffer) Start() {
 
 		fmt.Print("Presiona las flechas (↑, ↓, ←, →) para desplazarte \n(presione 'esc' para salir)\n")
 		_, key, err := keyboard.GetKey()
-		clearScreen()
+		ClearScreen()
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
@@ -74,7 +76,7 @@ func (s *Sniffer) Start() {
 	}
 }
 
-func clearScreen() {
+func ClearScreen() {
 	cmd := exec.Command("cmd", "/c", "cls")
 	cmd.Stdout = os.Stdout
 	cmd.Run()
@@ -85,17 +87,16 @@ func (s *Sniffer) Run() {
 	Exit := false
 
 	for !Exit {
-		fmt.Print("Movimientos: ", s.Actuador.Movements, "/", s.Actuador.LimMoves,"\n")
-		s.Env.PrintMatrix()
-		time.Sleep(1 * time.Second)
-		clearScreen()
+		s.Show()
+		time.Sleep(100 * time.Millisecond)
+		ClearScreen()
 
 		currentPos := s.Env.GetPositionAgent()
 		if s.Sensor.DetectDirt(currentPos) {
 			s.Env.CleanCell(currentPos)
 		}
 
-		availableMoves := s.Sensor.GetMoves()
+		availableMoves := s.Actuador.GetAvailableMoves()
 		availableMoves = filterMoves(availableMoves, s.Actuador.Memory)
 		if len(availableMoves) > 0 {
 			moveFound := false
@@ -103,25 +104,19 @@ func (s *Sniffer) Run() {
 				if s.Sensor.DetectDirt(move) {
 					s.Actuador.MoveAgent(move)
 					s.Env.CleanCell(move)
-					fmt.Println("Moviendo a ", move)
+					// fmt.Println("Moviendo a ", move)
 					moveFound = true
 					break
 				}
 			}
-
 			if !moveFound {
-				// No se encontró suciedad en las posiciones disponibles, moverse aleatoriamente
-				index := rand.Intn(len(availableMoves))
-				destino := availableMoves[index]
-				s.Actuador.MoveAgent(destino)
-				fmt.Println("Moviendo a ", destino)
+				s.Actuador.JumpAgent()
 			}
 		}
-
 		// Condición de paro
 		if s.Actuador.Movements == s.Actuador.LimMoves {
 			Exit = true
-			s.Env.PrintMatrix()
+			s.Show()
 		}
 	}
 }
@@ -149,3 +144,11 @@ func positionInMemory(pos [2]int, memory *list.List) bool {
 	return false
 }
 
+func (s *Sniffer) Show() {
+	fmt.Printf("Movimientos: %s/%s\n", color.CyanString(strconv.Itoa(s.Actuador.Movements)), color.CyanString(strconv.Itoa(s.Actuador.LimMoves)))
+	fmt.Printf("Celdas en memoria: %s\n", color.YellowString(strconv.Itoa(s.Actuador.Memory.Len())))
+	fmt.Printf("Basura total: %s\n",color.MagentaString(strconv.Itoa(s.Env.DirtCount)))
+	fmt.Printf("Basura limpiada: %s\n", color.GreenString(strconv.Itoa(s.Env.CleanCellCount)))
+	fmt.Printf("Porcentaje de limpieza: %s%%\n\n", color.RedString("%.2f", (float64(s.Env.CleanCellCount)/float64(s.Env.DirtCount))*100))	
+	s.Env.PrintMatrix()
+}

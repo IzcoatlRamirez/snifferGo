@@ -10,6 +10,8 @@ type Entorno struct {
 	probabilityDirt float64
 	positionAgent   [2]int
 	matrix          [][]bool
+	DirtCount 	 	int
+	CleanCellCount  int
 }
 
 // NewEntorno crea una nueva instancia de Entorno.
@@ -17,6 +19,7 @@ func NewEntorno(Dimension int, probabilityDirt float64) *Entorno {
 	e := &Entorno{
  		Dimension:       Dimension,
 		probabilityDirt: probabilityDirt,
+		CleanCellCount: 0,
 	}
 	e.positionAgent = [2]int{0, 0}
 	e.generateDirt()
@@ -41,12 +44,14 @@ func (e *Entorno) PrintMatrix() {
 
 // generateDirt genera suciedad en el entorno según la probabilidad.
 func (e *Entorno) generateDirt() {
+	e.DirtCount = 0
 	for i := 0; i < e.Dimension; i++ {
 		var row []bool
 		for j := 0; j < e.Dimension; j++ {
 			random := rand.Float64()
 			if random < e.probabilityDirt {
 				row = append(row, true)
+				e.DirtCount++
 			} else {
 				row = append(row, false)
 			}
@@ -58,6 +63,7 @@ func (e *Entorno) generateDirt() {
 // CleanCell limpia una celda específica en el entorno.
 func (e *Entorno) CleanCell(position [2]int) {
 	e.matrix[position[0]][position[1]] = false
+	e.CleanCellCount++
 }
 
 // IsDirty verifica si una posición específica en el entorno está sucia.
@@ -75,81 +81,5 @@ func (e *Entorno) MoveAgent(position [2]int) {
 	e.positionAgent = position
 }
 
-func (e *Entorno) GetAvailableMoves() [][2]int{
-	currentPos := e.GetPositionAgent()
-	moves := make([][2]int, 0)
-	
-	//ezquina superior izquierda
-	if currentPos[0]==0 && currentPos[1] == 0 {
-		moves = append(moves, [2]int{currentPos[0]+1, currentPos[1]})
-		moves = append(moves, [2]int{currentPos[0], currentPos[1]+1})
-		fmt.Println("Esquina superior izquierda")
-	}
 
-	
-	//ezquina superior derecha
-	if currentPos[0]==0 && currentPos[1] == e.Dimension-1 {
-		moves = append(moves, [2]int{currentPos[0]+1, currentPos[1]})
-		moves = append(moves, [2]int{currentPos[0], currentPos[1]-1})
-		fmt.Println("Esquina superior derecha")
-	}
-
-
-	//ezquina inferior izquierda
-	if currentPos[0]==e.Dimension-1 && currentPos[1] == 0 {
-		moves = append(moves, [2]int{currentPos[0]-1, currentPos[1]})
-		moves = append(moves, [2]int{currentPos[0], currentPos[1]+1})
-		fmt.Println("Esquina inferior izquierda")
-	}
-
-	//ezquina inferior derecha
-	if currentPos[0]==e.Dimension-1 && currentPos[1] == e.Dimension-1 {
-		moves = append(moves, [2]int{currentPos[0]-1, currentPos[1]})
-		moves = append(moves, [2]int{currentPos[0], currentPos[1]-1})
-		fmt.Println("Esquina inferior derecha")
-	}
-
-	//borde superior
-	if currentPos [0] == 0 && currentPos [1] != 0 && currentPos [1] != e.Dimension-1{
-		moves = append(moves, [2]int{currentPos[0]+1, currentPos[1]})
-		moves = append(moves, [2]int{currentPos[0], currentPos[1]+1})
-		moves = append(moves, [2]int{currentPos[0], currentPos[1]-1})
-		fmt.Println("Borde superior")
-	}
-
-	//borde inferior
-	if currentPos [0] == e.Dimension-1 && currentPos [1] != 0 && currentPos [1] != e.Dimension-1{
-		moves = append(moves, [2]int{currentPos[0]-1, currentPos[1]})
-		moves = append(moves, [2]int{currentPos[0], currentPos[1]+1})
-		moves = append(moves, [2]int{currentPos[0], currentPos[1]-1})
-		fmt.Println("Borde inferior")
-	}
-
-	//borde izquierdo
-	if currentPos [1] == 0 && currentPos [0] != 0 && currentPos [0] != e.Dimension-1{
-		moves = append(moves, [2]int{currentPos[0]+1, currentPos[1]})
-		moves = append(moves, [2]int{currentPos[0]-1, currentPos[1]})
-		moves = append(moves, [2]int{currentPos[0], currentPos[1]+1})
-		fmt.Println("Borde izquierdo")
-	}
-
-	//borde derecho
-	if currentPos [1] == e.Dimension-1 && currentPos [0] != 0 && currentPos [0] != e.Dimension-1{
-		moves = append(moves, [2]int{currentPos[0]+1, currentPos[1]})
-		moves = append(moves, [2]int{currentPos[0]-1, currentPos[1]})
-		moves = append(moves, [2]int{currentPos[0], currentPos[1]-1})
-		fmt.Println("Borde derecho")
-	}
-
-	//centro
-	if currentPos [0] != 0 && currentPos [0] != e.Dimension-1 && currentPos [1] != 0 && currentPos [1] != e.Dimension-1{
-		moves = append(moves, [2]int{currentPos[0]+1, currentPos[1]})
-		moves = append(moves, [2]int{currentPos[0]-1, currentPos[1]})
-		moves = append(moves, [2]int{currentPos[0], currentPos[1]+1})
-		moves = append(moves, [2]int{currentPos[0], currentPos[1]-1})
-		fmt.Println("Centro")
-	}
-
-	return moves
-}
 
