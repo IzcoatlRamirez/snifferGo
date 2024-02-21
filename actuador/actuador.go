@@ -1,33 +1,38 @@
 package actuador
 
-import "github.com/IzcoatlRam/sniffer-go/entorno"
-import "fmt"
-import "container/list"
-import "math/rand"
+import (
+	"container/list"
+	"fmt"
+	"math/rand"
+
+	"github.com/IzcoatlRam/sniffer-go/entorno"
+)
 
 type ActuadorSimple struct {
-	env *entorno.Entorno
-	MaxPos int
-	MinPos int
-	LimMoves int
+	env       *entorno.Entorno
+	MaxPos    int
+	MinPos    int
+	LimMoves  int
 	Movements int
-	Memory   *list.List
-	Jumps	int
-	JumpSize int
+	Memory    *list.List
+	Jumps     int
+	JumpSize  int
+	Cont      int
 }
 
 // NewActuadorSimple crea una nueva instancia de ActuadorSimple.
 func NewActuadorSimple(env *entorno.Entorno) *ActuadorSimple {
 	return &ActuadorSimple{
-		env: env,
-		MaxPos: env.Dimension,
-		MinPos: 0,
-		LimMoves: ((env.Dimension * env.Dimension)/3)*2,
+		env:       env,
+		MaxPos:    env.Dimension,
+		MinPos:    0,
+		LimMoves:  ((env.Dimension * env.Dimension) / 3) * 2,
 		Movements: 0,
-		Jumps: 0,
-		Memory:   list.New(),
-		JumpSize: env.Dimension,
-		}
+		Jumps:     0,
+		Memory:    list.New(),
+		JumpSize:  env.Dimension,
+		Cont:      0,
+	}
 }
 
 // KeyUp implementa la función de movimiento hacia arriba para ActuadorSimple.
@@ -81,99 +86,97 @@ func (a *ActuadorSimple) KeyRight() {
 }
 
 func (a *ActuadorSimple) MoveAgent(pos [2]int) {
-    a.env.MoveAgent(pos)
-    a.Movements++
+	a.env.MoveAgent(pos)
+	a.Movements++
 }
 
 func (a *ActuadorSimple) isCellVisited(pos [2]int) bool {
-    for e := a.Memory.Front(); e != nil; e = e.Next() {
-        if e.Value.([2]int) == pos {
-            return true
-        }
-    }
-    return false
+	for e := a.Memory.Front(); e != nil; e = e.Next() {
+		if e.Value.([2]int) == pos {
+			return true
+		}
+	}
+	return false
 }
 
-func (a *ActuadorSimple) GetAvailableMoves() [][2]int{
+func (a *ActuadorSimple) GetAvailableMoves() [][2]int {
 	currentPos := a.env.GetPositionAgent()
 	moves := make([][2]int, 0)
-	
+
 	//ezquina superior izquierda
-	if currentPos[0]==0 && currentPos[1] == 0 {
-		moves = append(moves, [2]int{currentPos[0]+1, currentPos[1]})
-		moves = append(moves, [2]int{currentPos[0], currentPos[1]+1})
+	if currentPos[0] == 0 && currentPos[1] == 0 {
+		moves = append(moves, [2]int{currentPos[0] + 1, currentPos[1]})
+		moves = append(moves, [2]int{currentPos[0], currentPos[1] + 1})
 		fmt.Println("Esquina superior izquierda")
 		a.cleanMemory()
 	}
 
-	
 	//ezquina superior derecha
-	if currentPos[0]==0 && currentPos[1] == a.env.Dimension-1 {
-		moves = append(moves, [2]int{currentPos[0]+1, currentPos[1]})
-		moves = append(moves, [2]int{currentPos[0], currentPos[1]-1})
+	if currentPos[0] == 0 && currentPos[1] == a.env.Dimension-1 {
+		moves = append(moves, [2]int{currentPos[0] + 1, currentPos[1]})
+		moves = append(moves, [2]int{currentPos[0], currentPos[1] - 1})
 		fmt.Println("Esquina superior derecha")
 		a.cleanMemory()
 	}
 
-
 	//ezquina inferior izquierda
-	if currentPos[0]==a.env.Dimension-1 && currentPos[1] == 0 {
-		moves = append(moves, [2]int{currentPos[0]-1, currentPos[1]})
-		moves = append(moves, [2]int{currentPos[0], currentPos[1]+1})
+	if currentPos[0] == a.env.Dimension-1 && currentPos[1] == 0 {
+		moves = append(moves, [2]int{currentPos[0] - 1, currentPos[1]})
+		moves = append(moves, [2]int{currentPos[0], currentPos[1] + 1})
 		fmt.Println("Esquina inferior izquierda")
 		a.cleanMemory()
 	}
 
 	//ezquina inferior derecha
-	if currentPos[0]==a.env.Dimension-1 && currentPos[1] == a.env.Dimension-1 {
-		moves = append(moves, [2]int{currentPos[0]-1, currentPos[1]})
-		moves = append(moves, [2]int{currentPos[0], currentPos[1]-1})
+	if currentPos[0] == a.env.Dimension-1 && currentPos[1] == a.env.Dimension-1 {
+		moves = append(moves, [2]int{currentPos[0] - 1, currentPos[1]})
+		moves = append(moves, [2]int{currentPos[0], currentPos[1] - 1})
 		fmt.Println("Esquina inferior derecha")
 		a.cleanMemory()
 	}
 
 	//borde superior
-	if currentPos [0] == 0 && currentPos [1] != 0 && currentPos [1] != a.env.Dimension-1{
-		moves = append(moves, [2]int{currentPos[0]+1, currentPos[1]})
-		moves = append(moves, [2]int{currentPos[0], currentPos[1]+1})
-		moves = append(moves, [2]int{currentPos[0], currentPos[1]-1})
+	if currentPos[0] == 0 && currentPos[1] != 0 && currentPos[1] != a.env.Dimension-1 {
+		moves = append(moves, [2]int{currentPos[0] + 1, currentPos[1]})
+		moves = append(moves, [2]int{currentPos[0], currentPos[1] + 1})
+		moves = append(moves, [2]int{currentPos[0], currentPos[1] - 1})
 		fmt.Println("Borde superior")
 		a.cleanMemory()
 	}
 
 	//borde inferior
-	if currentPos [0] == a.env.Dimension-1 && currentPos [1] != 0 && currentPos [1] != a.env.Dimension-1{
-		moves = append(moves, [2]int{currentPos[0]-1, currentPos[1]})
-		moves = append(moves, [2]int{currentPos[0], currentPos[1]+1})
-		moves = append(moves, [2]int{currentPos[0], currentPos[1]-1})
+	if currentPos[0] == a.env.Dimension-1 && currentPos[1] != 0 && currentPos[1] != a.env.Dimension-1 {
+		moves = append(moves, [2]int{currentPos[0] - 1, currentPos[1]})
+		moves = append(moves, [2]int{currentPos[0], currentPos[1] + 1})
+		moves = append(moves, [2]int{currentPos[0], currentPos[1] - 1})
 		fmt.Println("Borde inferior")
 		a.cleanMemory()
 	}
 
 	//borde izquierdo
-	if currentPos [1] == 0 && currentPos [0] != 0 && currentPos [0] != a.env.Dimension-1{
-		moves = append(moves, [2]int{currentPos[0]+1, currentPos[1]})
-		moves = append(moves, [2]int{currentPos[0]-1, currentPos[1]})
-		moves = append(moves, [2]int{currentPos[0], currentPos[1]+1})
+	if currentPos[1] == 0 && currentPos[0] != 0 && currentPos[0] != a.env.Dimension-1 {
+		moves = append(moves, [2]int{currentPos[0] + 1, currentPos[1]})
+		moves = append(moves, [2]int{currentPos[0] - 1, currentPos[1]})
+		moves = append(moves, [2]int{currentPos[0], currentPos[1] + 1})
 		fmt.Println("Borde izquierdo")
 		a.cleanMemory()
 	}
 
 	//borde derecho
-	if currentPos [1] == a.env.Dimension-1 && currentPos [0] != 0 && currentPos [0] != a.env.Dimension-1{
-		moves = append(moves, [2]int{currentPos[0]+1, currentPos[1]})
-		moves = append(moves, [2]int{currentPos[0]-1, currentPos[1]})
-		moves = append(moves, [2]int{currentPos[0], currentPos[1]-1})
+	if currentPos[1] == a.env.Dimension-1 && currentPos[0] != 0 && currentPos[0] != a.env.Dimension-1 {
+		moves = append(moves, [2]int{currentPos[0] + 1, currentPos[1]})
+		moves = append(moves, [2]int{currentPos[0] - 1, currentPos[1]})
+		moves = append(moves, [2]int{currentPos[0], currentPos[1] - 1})
 		fmt.Println("Borde derecho")
 		a.cleanMemory()
 	}
 
 	//centro
-	if currentPos [0] != 0 && currentPos [0] != a.env.Dimension-1 && currentPos [1] != 0 && currentPos [1] != a.env.Dimension-1{
-		moves = append(moves, [2]int{currentPos[0]+1, currentPos[1]})
-		moves = append(moves, [2]int{currentPos[0]-1, currentPos[1]})
-		moves = append(moves, [2]int{currentPos[0], currentPos[1]+1})
-		moves = append(moves, [2]int{currentPos[0], currentPos[1]-1})
+	if currentPos[0] != 0 && currentPos[0] != a.env.Dimension-1 && currentPos[1] != 0 && currentPos[1] != a.env.Dimension-1 {
+		moves = append(moves, [2]int{currentPos[0] + 1, currentPos[1]})
+		moves = append(moves, [2]int{currentPos[0] - 1, currentPos[1]})
+		moves = append(moves, [2]int{currentPos[0], currentPos[1] + 1})
+		moves = append(moves, [2]int{currentPos[0], currentPos[1] - 1})
 		fmt.Println("Centro")
 	}
 
@@ -210,7 +213,7 @@ func (a *ActuadorSimple) JumpAgent() {
 	// Obtener la posición actual del agente
 	currentPos := a.env.GetPositionAgent()
 
-	// Generar una nueva posición aleatoria 
+	// Generar una nueva posición aleatoria
 	newPos := generateRandomPosition(currentPos, a.JumpSize, a.env)
 
 	// Mover al agente a la nueva posición
@@ -228,4 +231,14 @@ func (a *ActuadorSimple) JumpAgent() {
 		}
 	}
 	a.Movements++
+}
+
+// regresa el valor del contador
+func (a *ActuadorSimple) GetCont() int {
+	return a.Cont
+}
+
+// aumenta en 1 el valor del contador
+func (a *ActuadorSimple) IncreaceCont(CeldasLimpiadas int) {
+	a.Cont = a.Cont + CeldasLimpiadas
 }

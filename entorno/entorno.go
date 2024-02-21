@@ -1,25 +1,28 @@
 package entorno
+
 import (
 	"fmt"
 	"math/rand"
+
 	"github.com/fatih/color"
 )
+
 // Entorno representa el entorno del sniffer.
 type Entorno struct {
 	Dimension       int
 	probabilityDirt float64
 	positionAgent   [2]int
 	matrix          [][]bool
-	DirtCount 	 	int
+	DirtCount       int
 	CleanCellCount  int
 }
 
 // NewEntorno crea una nueva instancia de Entorno.
 func NewEntorno(Dimension int, probabilityDirt float64) *Entorno {
 	e := &Entorno{
- 		Dimension:       Dimension,
+		Dimension:       Dimension,
 		probabilityDirt: probabilityDirt,
-		CleanCellCount: 0,
+		CleanCellCount:  0,
 	}
 	e.positionAgent = [2]int{0, 0}
 	e.generateDirt()
@@ -81,5 +84,7 @@ func (e *Entorno) MoveAgent(position [2]int) {
 	e.positionAgent = position
 }
 
-
-
+// Regresa el contador de celdas limpiadas
+func (e *Entorno) GetCleanCount() int {
+	return e.CleanCellCount
+}

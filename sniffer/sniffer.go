@@ -3,16 +3,17 @@ package sniffer
 import (
 	"container/list"
 	"fmt"
+	"math/rand"
+	"os"
+	"os/exec"
+	"strconv"
+	"time"
+
 	"github.com/IzcoatlRam/sniffer-go/actuador"
 	"github.com/IzcoatlRam/sniffer-go/entorno"
 	"github.com/IzcoatlRam/sniffer-go/sensor"
 	"github.com/eiannone/keyboard"
-	"math/rand"
-	"os"
-	"os/exec"
-	"time"
 	"github.com/fatih/color"
-	"strconv"
 )
 
 type Sniffer struct {
@@ -104,7 +105,6 @@ func (s *Sniffer) Run() {
 				if s.Sensor.DetectDirt(move) {
 					s.Actuador.MoveAgent(move)
 					s.Env.CleanCell(move)
-					// fmt.Println("Moviendo a ", move)
 					moveFound = true
 					break
 				}
@@ -116,6 +116,7 @@ func (s *Sniffer) Run() {
 		// Condición de paro
 		if s.Actuador.Movements == s.Actuador.LimMoves {
 			Exit = true
+			s.Actuador.IncreaceCont(s.Env.GetCleanCount())
 			s.Show()
 		}
 	}
@@ -147,8 +148,12 @@ func positionInMemory(pos [2]int, memory *list.List) bool {
 func (s *Sniffer) Show() {
 	fmt.Printf("Movimientos: %s/%s\n", color.CyanString(strconv.Itoa(s.Actuador.Movements)), color.CyanString(strconv.Itoa(s.Actuador.LimMoves)))
 	fmt.Printf("Celdas en memoria: %s\n", color.YellowString(strconv.Itoa(s.Actuador.Memory.Len())))
-	fmt.Printf("Basura total: %s\n",color.MagentaString(strconv.Itoa(s.Env.DirtCount)))
-	fmt.Printf("Basura limpiada: %s\n", color.GreenString(strconv.Itoa(s.Env.CleanCellCount)))
-	fmt.Printf("Porcentaje de limpieza: %s%%\n\n", color.RedString("%.2f", (float64(s.Env.CleanCellCount)/float64(s.Env.DirtCount))*100))	
+	fmt.Printf("Basura total: %s\n", color.MagentaString(strconv.Itoa(s.Env.DirtCount)))
+	fmt.Printf("Puntuaje: %s\n", color.GreenString(strconv.Itoa(s.Env.CleanCellCount)))
+	fmt.Printf("Porcentaje de limpieza: %s%%\n\n", color.RedString("%.2f", (float64(s.Env.CleanCellCount)/float64(s.Env.DirtCount))*100))
 	s.Env.PrintMatrix()
+}
+
+func (s *Sniffer) GetPuntuaje() int {
+	return s.Env.CleanCellCount
 }
